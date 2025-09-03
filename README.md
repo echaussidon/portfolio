@@ -29,7 +29,7 @@ To run this website locally:
 1. Clone this repository
 2. Open `index.html` in your browser
 
-Or visit the deployed version at: [your-website-url.com](https://your-website-url.com)
+Or visit the deployed version at: [echaussidon.github.io/portfolio/](https://echaussidon.github.io/portfolio/)
 
 ## Deployment
 
