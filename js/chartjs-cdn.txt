@@ -1,2 +1,0 @@
-// Chart.js CDN fallback if not using npm build
-// <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
