@@ -31,17 +31,12 @@
             border-radius: var(--border-radius);
         }
         
-        .next-update-info {
-            font-size: 0.9rem;
-            color: #666;
-            margin-top: 5px;
-        }
-        
         #publications-loading {
             text-align: center;
             padding: 20px;
             font-style: italic;
             color: #666;
+            display: none;
         }
         
         #publications-error {
@@ -52,19 +47,6 @@
             border-radius: var(--border-radius);
             margin-bottom: 20px;
             display: none;
-        }
-        
-        .error-help {
-            font-size: 0.9rem;
-            text-align: left;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(0,0,0,0.1);
-        }
-        
-        .error-help ul {
-            margin: 10px 0;
-            padding-left: 20px;
         }
         
         /* Manual Update Button */
@@ -86,50 +68,6 @@
         
         .manual-update button:hover {
             background-color: var(--primary-color);
-        }
-        
-        /* Debug Panel */
-        .debug-panel {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: var(--border-radius);
-            display: none;
-        }
-        
-        .debug-panel h3 {
-            margin-bottom: 15px;
-            color: #343a40;
-        }
-        
-        #debug-info {
-            max-height: 200px;
-            overflow-y: auto;
-            font-family: monospace;
-            font-size: 0.9rem;
-            background-color: #343a40;
-            color: #f8f9fa;
-            padding: 10px;
-            border-radius: 4px;
-        }
-        
-        #debug-info div {
-            margin-bottom: 5px;
-        }
-        
-        .debug-toggle {
-            margin-top: 10px;
-            text-align: right;
-        }
-        
-        .debug-toggle button {
-            background-color: transparent;
-            border: 1px solid #ced4da;
-            padding: 5px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
         }
         
         /* Publication Stats Styles */
@@ -308,39 +246,24 @@
         <div class="container">
             <div class="publications-header">
                 <h2>Publications</h2>
-                <p>This page automatically fetches my publications from INSPIRE-HEP once per day.</p>
+                <p>My publication record from INSPIRE-HEP</p>
                 <div class="last-updated-info">
-                    <div>Last updated: <span id="last-updated">Loading...</span></div>
-                    <!-- The next update info will be added dynamically by the script -->
+                    <div>Data as of: <span id="last-updated">Loading...</span></div>
                 </div>
             </div>
             
             <div id="publications-error"></div>
-            
             <div id="publications-loading">
                 <i class="fas fa-spinner fa-spin"></i> Loading publications data...
             </div>
             
             <div class="manual-update">
-                <button id="refresh-publications">Manually Refresh Publications</button>
+                <button id="refresh-publications">Refresh Publications Data</button>
             </div>
             
             <div id="publication-stats"></div>
             
             <ul id="publications-list"></ul>
-            
-            <div class="debug-panel" id="debug-panel">
-                <h3>Debug Information</h3>
-                <div id="debug-info"></div>
-                <div class="debug-toggle">
-                    <button id="clear-cache">Clear Cache</button>
-                    <button id="close-debug">Close Debug Panel</button>
-                </div>
-            </div>
-            
-            <div style="text-align: center; margin-top: 40px;">
-                <button id="toggle-debug" style="background: none; border: none; color: #999; font-size: 0.8rem; cursor: pointer;">Show Debug Info</button>
-            </div>
         </div>
     </section>
 
@@ -362,36 +285,5 @@
 
     <script src="js/main.js"></script>
     <script src="js/publications.js"></script>
-    <script>
-        // Debug panel controls
-        document.addEventListener('DOMContentLoaded', () => {
-            const debugPanel = document.getElementById('debug-panel');
-            const toggleDebug = document.getElementById('toggle-debug');
-            const closeDebug = document.getElementById('close-debug');
-            const clearCache = document.getElementById('clear-cache');
-            const refreshButton = document.getElementById('refresh-publications');
-            
-            toggleDebug.addEventListener('click', () => {
-                debugPanel.style.display = debugPanel.style.display === 'block' ? 'none' : 'block';
-                toggleDebug.textContent = debugPanel.style.display === 'block' ? 'Hide Debug Info' : 'Show Debug Info';
-            });
-            
-            closeDebug.addEventListener('click', () => {
-                debugPanel.style.display = 'none';
-                toggleDebug.textContent = 'Show Debug Info';
-            });
-            
-            clearCache.addEventListener('click', () => {
-                localStorage.removeItem('inspire-publications-1908124');
-                alert('Cache cleared! Refreshing page...');
-                window.location.reload();
-            });
-            
-            refreshButton.addEventListener('click', () => {
-                localStorage.removeItem('inspire-publications-1908124');
-                window.location.reload();
-            });
-        });
-    </script>
 </body>
 </html>
