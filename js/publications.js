@@ -133,74 +133,6 @@ class InspirePublications {
     }
     
     /**
-     * Load fallback data for when the API is unavailable
-     */
-    loadFallbackData() {
-        // Based on the publications found for the author
-        this.publicationsData = {
-            hits: {
-                hits: [
-                    {
-                        id: '2105642',
-                        metadata: {
-                            titles: [{ title: 'Euclid preparation. XVII. Cosmic Dawn Survey: Spitzer Space Telescope observations of the Euclid deep fields and calibration fields' }],
-                            authors: [
-                                { full_name: 'Moneti, A.' },
-                                { full_name: 'Echaussidon, E.' },
-                                { full_name: 'et al.' }
-                            ],
-                            publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '658', page_start: 'A126' }],
-                            citation_count: 13,
-                            arxiv_eprints: [{ value: '2110.13923' }],
-                            dois: [{ value: '10.1051/0004-6361/202141606' }]
-                        }
-                    },
-                    {
-                        id: '1891170',
-                        metadata: {
-                            titles: [{ title: 'Euclid preparation: XII. Optimizing the photometric sample of the Euclid survey for galaxy clustering and galaxy-galaxy lensing analyses' }],
-                            authors: [
-                                { full_name: 'Pocino, A.' },
-                                { full_name: 'Echaussidon, E.' },
-                                { full_name: 'et al.' }
-                            ],
-                            publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '661', page_start: 'A56' }],
-                            citation_count: 5,
-                            arxiv_eprints: [{ value: '2110.11416' }],
-                            dois: [{ value: '10.1051/0004-6361/202141648' }]
-                        }
-                    },
-                    {
-                        id: '2133490',
-                        metadata: {
-                            titles: [{ title: 'Euclid preparation: XXV. The Euclid Morphology Challenge -- Towards model-fitting photometry for billions of galaxies' }],
-                            authors: [
-                                { full_name: 'Bretonniere, H.' },
-                                { full_name: 'Echaussidon, E.' },
-                                { full_name: 'et al.' }
-                            ],
-                            publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '664', page_start: 'A92' }],
-                            citation_count: 2,
-                            arxiv_eprints: [{ value: '2204.06540' }],
-                            dois: [{ value: '10.1051/0004-6361/202142969' }]
-                        }
-                    }
-                ]
-            }
-        };
-        
-        this.authorData = {
-            metadata: {
-                name: 'Echaussidon, E.',
-                citation_summary: {
-                    citation_count: 20,
-                    h_index: 2
-                }
-            }
-        };
-    }
-    
-    /**
      * Render the UI with current data
      */
     renderUI() {
@@ -411,7 +343,7 @@ class InspirePublications {
 // Initialize when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
     // Author ID from INSPIRE-HEP
-    const authorId = '1908124';
+    const authorId = 'E.Chaussidon.1';
     
     // Create and initialize the component
     const publications = new InspirePublications(authorId, {
