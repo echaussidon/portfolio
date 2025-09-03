@@ -1,12 +1,17 @@
 /**
- * Instant-Loading Publications Component for INSPIRE-HEP
- * Displays publications immediately with pre-loaded data
+ * INSPIRE-HEP Publications Component
+ * Based on the official INSPIRE-HEP REST API documentation
+ * https://github.com/inspirehep/rest-api-doc
  */
 
-class PublicationsDisplay {
+class InspirePublications {
     constructor(authorId, options = {}) {
+        // Core properties
         this.authorId = authorId;
         this.apiBaseUrl = 'https://inspirehep.net/api';
+        this.size = options.size || 100;
+        
+        // DOM elements
         this.publicationsElement = document.getElementById(options.publicationsElementId || 'publications-list');
         this.statsElement = document.getElementById(options.statsElementId || 'publication-stats');
         this.loadingElement = document.getElementById(options.loadingElementId || 'publications-loading');
@@ -14,249 +19,203 @@ class PublicationsDisplay {
         this.lastUpdatedElement = document.getElementById(options.lastUpdatedElementId || 'last-updated');
         this.refreshButton = document.getElementById(options.refreshButtonId || 'refresh-publications');
         
-        // Bind event handler
+        // Bind event handlers
         if (this.refreshButton) {
-            this.refreshButton.addEventListener('click', () => this.refreshData());
+            this.refreshButton.addEventListener('click', () => this.fetchAndDisplayData(true));
         }
-    }
-
-    /**
-     * Initialize with immediate data display
-     */
-    init() {
-        // Hide loading state immediately
-        this.hideLoading();
         
-        // Display pre-loaded data instantly
-        this.displayFallbackData();
+        // Initialize data storage
+        this.publicationsData = null;
+        this.authorData = null;
+    }
+    
+    /**
+     * Initialize the component
+     */
+    async init() {
+        // First display cached data if available
+        if (this.loadCachedData()) {
+            this.renderUI();
+        } else {
+            this.showLoading();
+        }
         
-        // Attempt API fetch in the background
-        this.fetchDataInBackground();
+        // Then fetch fresh data
+        await this.fetchAndDisplayData();
     }
     
     /**
-     * Show loading indicator
+     * Load data from localStorage
      */
-    showLoading() {
-        if (this.loadingElement) {
-            this.loadingElement.style.display = 'block';
-        }
-    }
-
-    /**
-     * Hide loading indicator
-     */
-    hideLoading() {
-        if (this.loadingElement) {
-            this.loadingElement.style.display = 'none';
-        }
-    }
-    
-    /**
-     * Update timestamp display
-     */
-    updateTimestamp(isFallback = false) {
-        if (this.lastUpdatedElement) {
-            const now = new Date();
-            const formattedDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const formattedTime = `${hours}:${minutes}:${seconds}`;
-            
-            let timestampText = `${formattedDate} ${formattedTime}`;
-            if (isFallback) {
-                timestampText += ' (using pre-loaded data)';
-            }
-            
-            this.lastUpdatedElement.textContent = timestampText;
-        }
-    }
-    
-    /**
-     * Display error message
-     */
-    showError(message) {
-        if (this.errorElement) {
-            this.errorElement.textContent = message;
-            this.errorElement.style.display = 'block';
-        }
-    }
-    
-    /**
-     * Hide error message
-     */
-    hideError() {
-        if (this.errorElement) {
-            this.errorElement.style.display = 'none';
-        }
-    }
-    
-    /**
-     * Force refresh of data
-     */
-    refreshData() {
-        this.showLoading();
-        this.hideError();
-        this.fetchDataInBackground(true); // true = force refresh UI
-    }
-
-    /**
-     * Fetch data in background without blocking UI
-     */
-    fetchDataInBackground(forceRefresh = false) {
-        // Attempt to fetch from API without blocking page load
-        setTimeout(() => {
-            fetch(`${this.apiBaseUrl}/literature?size=100&sort=mostrecent&q=author:${this.authorId}&_=${Date.now()}`, {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                },
-                mode: 'cors'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`API error: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(publicationsData => {
-                // If we successfully got publications data, try to get citation data
-                return fetch(`${this.apiBaseUrl}/authors/${this.authorId}?_=${Date.now()}`, {
-                    method: 'GET',
-                    headers: {
-                        'Accept': 'application/json'
-                    },
-                    mode: 'cors'
-                })
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`Author API error: ${response.status}`);
-                    }
-                    return response.json();
-                })
-                .then(citationsData => {
-                    // We have both data sources, update the UI
-                    const data = {
-                        publications: publicationsData.hits.hits,
-                        citationSummary: citationsData.metadata.citation_summary,
-                        metadata: citationsData.metadata
-                    };
-                    
-                    if (forceRefresh) {
-                        this.renderPublications(data.publications);
-                        this.renderStatistics(data);
-                        this.updateTimestamp(false);
-                        this.hideLoading();
-                    }
-                    
-                    // Store for future page loads
-                    try {
-                        localStorage.setItem(`inspire-publications-${this.authorId}`, JSON.stringify({
-                            data: data,
-                            timestamp: Date.now()
-                        }));
-                    } catch (e) {
-                        console.warn('Failed to save to cache:', e);
-                    }
-                });
-            })
-            .catch(error => {
-                console.warn('Background fetch failed:', error);
-                if (forceRefresh) {
-                    this.showError(`Could not refresh data: ${error.message}`);
-                    this.hideLoading();
-                }
-            });
-        }, 100); // Short delay to ensure UI loads first
-    }
-
-    /**
-     * Immediately display pre-loaded data
-     */
-    displayFallbackData() {
-        // First try to get data from localStorage
+    loadCachedData() {
         try {
-            const cachedData = localStorage.getItem(`inspire-publications-${this.authorId}`);
-            if (cachedData) {
-                const parsedData = JSON.parse(cachedData);
-                this.renderPublications(parsedData.data.publications);
-                this.renderStatistics(parsedData.data);
-                this.updateTimestamp(false);
-                return;
+            const cachedPublications = localStorage.getItem(`inspire-publications-${this.authorId}`);
+            const cachedAuthor = localStorage.getItem(`inspire-author-${this.authorId}`);
+            
+            if (cachedPublications && cachedAuthor) {
+                this.publicationsData = JSON.parse(cachedPublications);
+                this.authorData = JSON.parse(cachedAuthor);
+                return true;
             }
         } catch (e) {
-            console.warn('Failed to load from cache:', e);
+            console.warn('Failed to load cached data:', e);
+        }
+        return false;
+    }
+    
+    /**
+     * Save data to localStorage
+     */
+    saveCachedData() {
+        try {
+            if (this.publicationsData) {
+                localStorage.setItem(`inspire-publications-${this.authorId}`, 
+                    JSON.stringify(this.publicationsData));
+            }
+            if (this.authorData) {
+                localStorage.setItem(`inspire-author-${this.authorId}`, 
+                    JSON.stringify(this.authorData));
+            }
+            localStorage.setItem(`inspire-last-updated-${this.authorId}`, Date.now().toString());
+        } catch (e) {
+            console.warn('Failed to save cached data:', e);
+        }
+    }
+    
+    /**
+     * Fetch and display publication data
+     */
+    async fetchAndDisplayData(isManualRefresh = false) {
+        if (isManualRefresh) {
+            this.showLoading();
+            this.hideError();
         }
         
-        // Otherwise use hardcoded data
-        const fallbackData = {
-            publications: [
-                {
-                    id: '2105642',
-                    metadata: {
-                        titles: [{ title: 'Euclid preparation. XVII. Cosmic Dawn Survey: Spitzer Space Telescope observations of the Euclid deep fields and calibration fields' }],
-                        authors: [
-                            { full_name: 'Moneti, A.' },
-                            { full_name: 'Echaussidon, E.' },
-                            { full_name: 'et al.' }
-                        ],
-                        publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '658', page_start: 'A126' }],
-                        citation_count: 13,
-                        arxiv_eprints: [{ value: '2110.13923' }],
-                        dois: [{ value: '10.1051/0004-6361/202141606' }]
+        try {
+            // First, get the author data which includes citation stats
+            const authorResponse = await fetch(`${this.apiBaseUrl}/authors/${this.authorId}`);
+            if (!authorResponse.ok) {
+                throw new Error(`Author API error: ${authorResponse.status}`);
+            }
+            this.authorData = await authorResponse.json();
+            
+            // Then get the publications data
+            // Using the literature endpoint with author search
+            const publicationsResponse = await fetch(
+                `${this.apiBaseUrl}/literature?size=${this.size}&sort=mostrecent&q=author:${this.authorId}`
+            );
+            if (!publicationsResponse.ok) {
+                throw new Error(`Publications API error: ${publicationsResponse.status}`);
+            }
+            this.publicationsData = await publicationsResponse.json();
+            
+            // Save to cache
+            this.saveCachedData();
+            
+            // Update UI
+            this.renderUI();
+            this.hideLoading();
+        } catch (error) {
+            console.error('Failed to fetch data from INSPIRE-HEP:', error);
+            
+            if (isManualRefresh) {
+                this.showError(`Failed to refresh data: ${error.message}`);
+                this.hideLoading();
+            }
+            
+            // If it's the initial load and we have no cached data, show some fallback data
+            if (!this.publicationsData && !this.authorData) {
+                this.loadFallbackData();
+                this.renderUI();
+                this.hideLoading();
+            }
+        }
+    }
+    
+    /**
+     * Load fallback data for when the API is unavailable
+     */
+    loadFallbackData() {
+        // Based on the publications found for the author
+        this.publicationsData = {
+            hits: {
+                hits: [
+                    {
+                        id: '2105642',
+                        metadata: {
+                            titles: [{ title: 'Euclid preparation. XVII. Cosmic Dawn Survey: Spitzer Space Telescope observations of the Euclid deep fields and calibration fields' }],
+                            authors: [
+                                { full_name: 'Moneti, A.' },
+                                { full_name: 'Echaussidon, E.' },
+                                { full_name: 'et al.' }
+                            ],
+                            publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '658', page_start: 'A126' }],
+                            citation_count: 13,
+                            arxiv_eprints: [{ value: '2110.13923' }],
+                            dois: [{ value: '10.1051/0004-6361/202141606' }]
+                        }
+                    },
+                    {
+                        id: '1891170',
+                        metadata: {
+                            titles: [{ title: 'Euclid preparation: XII. Optimizing the photometric sample of the Euclid survey for galaxy clustering and galaxy-galaxy lensing analyses' }],
+                            authors: [
+                                { full_name: 'Pocino, A.' },
+                                { full_name: 'Echaussidon, E.' },
+                                { full_name: 'et al.' }
+                            ],
+                            publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '661', page_start: 'A56' }],
+                            citation_count: 5,
+                            arxiv_eprints: [{ value: '2110.11416' }],
+                            dois: [{ value: '10.1051/0004-6361/202141648' }]
+                        }
+                    },
+                    {
+                        id: '2133490',
+                        metadata: {
+                            titles: [{ title: 'Euclid preparation: XXV. The Euclid Morphology Challenge -- Towards model-fitting photometry for billions of galaxies' }],
+                            authors: [
+                                { full_name: 'Bretonniere, H.' },
+                                { full_name: 'Echaussidon, E.' },
+                                { full_name: 'et al.' }
+                            ],
+                            publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '664', page_start: 'A92' }],
+                            citation_count: 2,
+                            arxiv_eprints: [{ value: '2204.06540' }],
+                            dois: [{ value: '10.1051/0004-6361/202142969' }]
+                        }
                     }
-                },
-                {
-                    id: '1891170',
-                    metadata: {
-                        titles: [{ title: 'Euclid preparation: XII. Optimizing the photometric sample of the Euclid survey for galaxy clustering and galaxy-galaxy lensing analyses' }],
-                        authors: [
-                            { full_name: 'Pocino, A.' },
-                            { full_name: 'Echaussidon, E.' },
-                            { full_name: 'et al.' }
-                        ],
-                        publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '661', page_start: 'A56' }],
-                        citation_count: 5,
-                        arxiv_eprints: [{ value: '2110.11416' }],
-                        dois: [{ value: '10.1051/0004-6361/202141648' }]
-                    }
-                },
-                {
-                    id: '2133490',
-                    metadata: {
-                        titles: [{ title: 'Euclid preparation: XXV. The Euclid Morphology Challenge -- Towards model-fitting photometry for billions of galaxies' }],
-                        authors: [
-                            { full_name: 'Bretonniere, H.' },
-                            { full_name: 'Echaussidon, E.' },
-                            { full_name: 'et al.' }
-                        ],
-                        publication_info: [{ journal_title: 'Astron.Astrophys.', year: '2022', journal_volume: '664', page_start: 'A92' }],
-                        citation_count: 2,
-                        arxiv_eprints: [{ value: '2204.06540' }],
-                        dois: [{ value: '10.1051/0004-6361/202142969' }]
-                    }
-                }
-            ],
-            citationSummary: {
-                citation_count: 20,
-                h_index: 2
-            },
-            metadata: {
-                name: 'Echaussidon, E.'
+                ]
             }
         };
         
-        this.renderPublications(fallbackData.publications);
-        this.renderStatistics(fallbackData);
-        this.updateTimestamp(true);
+        this.authorData = {
+            metadata: {
+                name: 'Echaussidon, E.',
+                citation_summary: {
+                    citation_count: 20,
+                    h_index: 2
+                }
+            }
+        };
     }
-
+    
     /**
-     * Render publications list
+     * Render the UI with current data
      */
-    renderPublications(publications) {
-        if (!this.publicationsElement || !publications) return;
+    renderUI() {
+        this.renderPublications();
+        this.renderStatistics();
+        this.updateLastUpdatedTime();
+    }
+    
+    /**
+     * Render the publications list
+     */
+    renderPublications() {
+        if (!this.publicationsElement || !this.publicationsData) return;
+        
+        const publications = this.publicationsData.hits.hits;
         
         // Clear current content
         this.publicationsElement.innerHTML = '';
@@ -331,26 +290,29 @@ class PublicationsDisplay {
             this.publicationsElement.appendChild(pubElement);
         });
     }
-
+    
     /**
      * Render publication statistics
      */
-    renderStatistics(data) {
-        if (!this.statsElement || !data) return;
+    renderStatistics() {
+        if (!this.statsElement || !this.authorData || !this.publicationsData) return;
         
-        const stats = data.citationSummary;
+        const citationSummary = this.authorData.metadata.citation_summary || {};
+        const publications = this.publicationsData.hits.hits;
         
         // Total publications
-        const totalPubs = data.publications.length;
+        const totalPubs = publications.length;
         
         // Extract citation stats
-        const citations = stats ? stats.citation_count : 0;
-        const hIndex = stats ? stats.h_index : 0;
+        const citations = citationSummary.citation_count || 0;
+        const hIndex = citationSummary.h_index || 0;
         
         // Calculate publications by year
         const pubsByYear = {};
-        data.publications.forEach(pub => {
-            const year = pub.metadata.publication_info && pub.metadata.publication_info[0] && pub.metadata.publication_info[0].year;
+        publications.forEach(pub => {
+            const year = pub.metadata.publication_info && 
+                         pub.metadata.publication_info[0] && 
+                         pub.metadata.publication_info[0].year;
             if (year) {
                 pubsByYear[year] = (pubsByYear[year] || 0) + 1;
             }
@@ -388,15 +350,71 @@ class PublicationsDisplay {
             ${pubsByYearHTML}
         `;
     }
+    
+    /**
+     * Update the last updated timestamp
+     */
+    updateLastUpdatedTime() {
+        if (!this.lastUpdatedElement) return;
+        
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        
+        this.lastUpdatedElement.textContent = timestamp;
+    }
+    
+    /**
+     * Show loading indicator
+     */
+    showLoading() {
+        if (this.loadingElement) {
+            this.loadingElement.style.display = 'block';
+        }
+    }
+    
+    /**
+     * Hide loading indicator
+     */
+    hideLoading() {
+        if (this.loadingElement) {
+            this.loadingElement.style.display = 'none';
+        }
+    }
+    
+    /**
+     * Show error message
+     */
+    showError(message) {
+        if (this.errorElement) {
+            this.errorElement.textContent = message;
+            this.errorElement.style.display = 'block';
+        }
+    }
+    
+    /**
+     * Hide error message
+     */
+    hideError() {
+        if (this.errorElement) {
+            this.errorElement.style.display = 'none';
+        }
+    }
 }
 
 // Initialize when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // The author ID from the URL: https://inspirehep.net/authors/1908124
+    // Author ID from INSPIRE-HEP
     const authorId = '1908124';
     
-    // Create and initialize the publications display
-    const display = new PublicationsDisplay(authorId, {
+    // Create and initialize the component
+    const publications = new InspirePublications(authorId, {
         publicationsElementId: 'publications-list',
         statsElementId: 'publication-stats',
         loadingElementId: 'publications-loading',
@@ -405,5 +423,5 @@ document.addEventListener('DOMContentLoaded', () => {
         refreshButtonId: 'refresh-publications'
     });
     
-    display.init();
+    publications.init();
 });
