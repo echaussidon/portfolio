@@ -1,21 +1,219 @@
-<section id="publications" class="section">
-  <div class="container">
-    <h2 class="section-title">Publications</h2>
-    
-    <div id="publication-stats" class="stats-container">
-      <!-- Stats will be inserted here by JavaScript -->
-    </div>
-    
-    <div id="publications-container">
-      <!-- Publications will be inserted here by JavaScript -->
-      <p class="loading">Loading publications...</p>
-    </div>
-    
-    <p class="text-center">
-      <a href="https://inspirehep.net/literature?sort=mostrecent&size=100&page=1&q=a%20E.Chaussidon.1&ui-citation-summary=true" 
-         target="_blank" rel="noopener" class="btn">
-        View All Publications on INSPIRE
-      </a>
-    </p>
-  </div>
-</section>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Me | Dr. Echaussidon - Cosmology Research</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .about-section {
+            padding: 80px 0;
+        }
+        
+        .about-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 40px;
+            align-items: start;
+        }
+        
+        .profile-image {
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
+        }
+        
+        .profile-image img {
+            width: 100%;
+            display: block;
+        }
+        
+        .bio h2 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+        }
+        
+        .bio p {
+            margin-bottom: 15px;
+        }
+        
+        .experience-section, .education-section {
+            padding: 60px 0;
+            background-color: #eef2f7;
+        }
+        
+        .experience-section h2, .education-section h2 {
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+        }
+        
+        .experience-section h2:after, .education-section h2:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 3px;
+            background-color: var(--accent-color);
+            margin: 15px auto 0;
+        }
+        
+        .timeline {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 4px;
+            background-color: var(--secondary-color);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -2px;
+        }
+        
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            width: 50%;
+            box-sizing: border-box;
+        }
+        
+        .timeline-item:nth-child(odd) {
+            left: 0;
+        }
+        
+        .timeline-item:nth-child(even) {
+            left: 50%;
+        }
+        
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            top: 15px;
+            right: -10px;
+            z-index: 1;
+        }
+        
+        .timeline-item:nth-child(even)::after {
+            left: -10px;
+        }
+        
+        .timeline-content {
+            padding: 20px;
+            background-color: var(--card-background);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        
+        .timeline-content h3 {
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+        
+        .timeline-content .date {
+            font-weight: bold;
+            color: var(--secondary-color);
+            margin-bottom: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .about-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .profile-image {
+                max-width: 300px;
+                margin: 0 auto 30px;
+            }
+            
+            .timeline::after {
+                left: 31px;
+            }
+            
+            .timeline-item {
+                width: 100%;
+                padding-left: 70px;
+                padding-right: 25px;
+            }
+            
+            .timeline-item:nth-child(even) {
+                left: 0;
+            }
+            
+            .timeline-item::after {
+                left: 21px;
+                right: auto;
+            }
+            
+            .timeline-item:nth-child(even)::after {
+                left: 21px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Dr. Echaussidon</h1>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="about.html" class="active">About</a></li>
+                    <li><a href="research.html">Research</a></li>
+                    <li><a href="publications.html">Publications</a></li>
+                    <li><a href="cv.html">CV</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="publications" class="section">
+      <div class="container">
+        <h2 class="section-title">Publications</h2>
+        
+        <div id="publication-stats" class="stats-container">
+          <!-- Stats will be inserted here by JavaScript -->
+        </div>
+        
+        <div id="publications-container">
+          <!-- Publications will be inserted here by JavaScript -->
+          <p class="loading">Loading publications...</p>
+        </div>
+        
+        <p class="text-center">
+          <a href="https://inspirehep.net/literature?sort=mostrecent&size=100&page=1&q=a%20E.Chaussidon.1&ui-citation-summary=true" 
+             target="_blank" rel="noopener" class="btn">
+            View All Publications on INSPIRE
+          </a>
+        </p>
+      </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>&copy; 2025 Dr. Echaussidon. All rights reserved.</p>
+                </div>
+                <div class="footer-right">
+                    <a href="https://github.com/yourusername" target="_blank"><i class="fab fa-github"></i></a>
+                    <a href="https://orcid.org/your-orcid" target="_blank"><i class="fab fa-orcid"></i></a>
+                    <a href="https://twitter.com/yourusername" target="_blank"><i class="fab fa-twitter"></i></a>
+                    <a href="https://linkedin.com/in/yourusername" target="_blank"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
