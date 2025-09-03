@@ -1,359 +1,182 @@
 /**
- * INSPIRE-HEP Publications Component
- * Based on the official INSPIRE-HEP REST API documentation
- * https://github.com/inspirehep/rest-api-doc
+ * Publications.js
+ * Script to fetch and display publication data from INSPIRE HEP
  */
 
-class InspirePublications {
-    constructor(authorId, options = {}) {
-        // Core properties
-        this.authorId = authorId;
-        this.apiBaseUrl = 'https://inspirehep.net/api';
-        this.size = options.size || 100;
-        
-        // DOM elements
-        this.publicationsElement = document.getElementById(options.publicationsElementId || 'publications-list');
-        this.statsElement = document.getElementById(options.statsElementId || 'publication-stats');
-        this.loadingElement = document.getElementById(options.loadingElementId || 'publications-loading');
-        this.errorElement = document.getElementById(options.errorElementId || 'publications-error');
-        this.lastUpdatedElement = document.getElementById(options.lastUpdatedElementId || 'last-updated');
-        this.refreshButton = document.getElementById(options.refreshButtonId || 'refresh-publications');
-        
-        // Bind event handlers
-        if (this.refreshButton) {
-            this.refreshButton.addEventListener('click', () => this.fetchAndDisplayData(true));
-        }
-        
-        // Initialize data storage
-        this.publicationsData = null;
-        this.authorData = null;
+const AUTHOR_QUERY = 'a E.Chaussidon.1';
+const API_URL = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&q=${encodeURIComponent(AUTHOR_QUERY)}`;
+
+// Stats to track
+let totalPublications = 0;
+let totalCitations = 0;
+let hIndex = 0;
+
+// Fetch publications data
+async function fetchPublicationsData() {
+  try {
+    const response = await fetch(API_URL);
+    
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`);
     }
     
-    /**
-     * Initialize the component
-     */
-    async init() {
-        // First display cached data if available
-        if (this.loadCachedData()) {
-            this.renderUI();
-        } else {
-            this.showLoading();
-        }
-        
-        // Then fetch fresh data
-        await this.fetchAndDisplayData();
-    }
-    
-    /**
-     * Load data from localStorage
-     */
-    loadCachedData() {
-        try {
-            const cachedPublications = localStorage.getItem(`inspire-publications-${this.authorId}`);
-            const cachedAuthor = localStorage.getItem(`inspire-author-${this.authorId}`);
-            
-            if (cachedPublications && cachedAuthor) {
-                this.publicationsData = JSON.parse(cachedPublications);
-                this.authorData = JSON.parse(cachedAuthor);
-                return true;
-            }
-        } catch (e) {
-            console.warn('Failed to load cached data:', e);
-        }
-        return false;
-    }
-    
-    /**
-     * Save data to localStorage
-     */
-    saveCachedData() {
-        try {
-            if (this.publicationsData) {
-                localStorage.setItem(`inspire-publications-${this.authorId}`, 
-                    JSON.stringify(this.publicationsData));
-            }
-            if (this.authorData) {
-                localStorage.setItem(`inspire-author-${this.authorId}`, 
-                    JSON.stringify(this.authorData));
-            }
-            localStorage.setItem(`inspire-last-updated-${this.authorId}`, Date.now().toString());
-        } catch (e) {
-            console.warn('Failed to save cached data:', e);
-        }
-    }
-    
-    /**
-     * Fetch and display publication data
-     */
-    async fetchAndDisplayData(isManualRefresh = false) {
-        if (isManualRefresh) {
-            this.showLoading();
-            this.hideError();
-        }
-        
-        try {
-            // First, get the author data which includes citation stats
-            const authorResponse = await fetch(`${this.apiBaseUrl}/authors/${this.authorId}`);
-            if (!authorResponse.ok) {
-                throw new Error(`Author API error: ${authorResponse.status}`);
-            }
-            this.authorData = await authorResponse.json();
-            
-            // Then get the publications data
-            // Using the literature endpoint with author search
-            const publicationsResponse = await fetch(
-                `${this.apiBaseUrl}/literature?size=${this.size}&sort=mostrecent&q=author:${this.authorId}`
-            );
-            if (!publicationsResponse.ok) {
-                throw new Error(`Publications API error: ${publicationsResponse.status}`);
-            }
-            this.publicationsData = await publicationsResponse.json();
-            
-            // Save to cache
-            this.saveCachedData();
-            
-            // Update UI
-            this.renderUI();
-            this.hideLoading();
-        } catch (error) {
-            console.error('Failed to fetch data from INSPIRE-HEP:', error);
-            
-            if (isManualRefresh) {
-                this.showError(`Failed to refresh data: ${error.message}`);
-                this.hideLoading();
-            }
-            
-            // If it's the initial load and we have no cached data, show some fallback data
-            if (!this.publicationsData && !this.authorData) {
-                this.loadFallbackData();
-                this.renderUI();
-                this.hideLoading();
-            }
-        }
-    }
-    
-    /**
-     * Render the UI with current data
-     */
-    renderUI() {
-        this.renderPublications();
-        this.renderStatistics();
-        this.updateLastUpdatedTime();
-    }
-    
-    /**
-     * Render the publications list
-     */
-    renderPublications() {
-        if (!this.publicationsElement || !this.publicationsData) return;
-        
-        const publications = this.publicationsData.hits.hits;
-        
-        // Clear current content
-        this.publicationsElement.innerHTML = '';
-        
-        if (publications.length === 0) {
-            this.publicationsElement.innerHTML = '<p>No publications found.</p>';
-            return;
-        }
-        
-        // Create publication items
-        publications.forEach(pub => {
-            const metadata = pub.metadata;
-            const title = metadata.titles ? metadata.titles[0].title : 'No title available';
-            
-            // Format authors
-            let authors = 'No authors listed';
-            if (metadata.authors && metadata.authors.length > 0) {
-                const authorNames = metadata.authors.map(author => author.full_name);
-                if (authorNames.length > 5) {
-                    authors = `${authorNames.slice(0, 5).join(', ')} et al.`;
-                } else {
-                    authors = authorNames.join(', ');
-                }
-            }
-            
-            // Get journal info
-            let journalInfo = 'Preprint';
-            if (metadata.publication_info && metadata.publication_info[0]) {
-                const pubInfo = metadata.publication_info[0];
-                if (pubInfo.journal_title) {
-                    journalInfo = pubInfo.journal_title;
-                    if (pubInfo.journal_volume) {
-                        journalInfo += ` ${pubInfo.journal_volume}`;
-                    }
-                    if (pubInfo.page_start) {
-                        journalInfo += `, ${pubInfo.page_start}`;
-                    }
-                    if (pubInfo.year) {
-                        journalInfo += ` (${pubInfo.year})`;
-                    }
-                }
-            }
-            
-            // Get citation count
-            const citationCount = metadata.citation_count || 0;
-            
-            // Get links
-            const links = [];
-            if (metadata.arxiv_eprints && metadata.arxiv_eprints[0]) {
-                const arxivId = metadata.arxiv_eprints[0].value;
-                links.push(`<a href="https://arxiv.org/abs/${arxivId}" target="_blank" class="link-arxiv">arXiv:${arxivId}</a>`);
-            }
-            if (metadata.dois && metadata.dois[0]) {
-                const doi = metadata.dois[0].value;
-                links.push(`<a href="https://doi.org/${doi}" target="_blank" class="link-doi">DOI</a>`);
-            }
-            links.push(`<a href="https://inspirehep.net/literature/${pub.id}" target="_blank" class="link-inspire">INSPIRE</a>`);
-            
-            // Create publication element
-            const pubElement = document.createElement('li');
-            pubElement.className = 'publication-item';
-            pubElement.innerHTML = `
-                <h3>${title}</h3>
-                <p class="authors">${authors}</p>
-                <p class="journal">${journalInfo}</p>
-                <div class="publication-meta">
-                    <span class="citation-count"><i class="fas fa-quote-right"></i> ${citationCount} citation${citationCount !== 1 ? 's' : ''}</span>
-                    <div class="publication-links">${links.join(' | ')}</div>
-                </div>
-            `;
-            
-            this.publicationsElement.appendChild(pubElement);
-        });
-    }
-    
-    /**
-     * Render publication statistics
-     */
-    renderStatistics() {
-        if (!this.statsElement || !this.authorData || !this.publicationsData) return;
-        
-        const citationSummary = this.authorData.metadata.citation_summary || {};
-        const publications = this.publicationsData.hits.hits;
-        
-        // Total publications
-        const totalPubs = publications.length;
-        
-        // Extract citation stats
-        const citations = citationSummary.citation_count || 0;
-        const hIndex = citationSummary.h_index || 0;
-        
-        // Calculate publications by year
-        const pubsByYear = {};
-        publications.forEach(pub => {
-            const year = pub.metadata.publication_info && 
-                         pub.metadata.publication_info[0] && 
-                         pub.metadata.publication_info[0].year;
-            if (year) {
-                pubsByYear[year] = (pubsByYear[year] || 0) + 1;
-            }
-        });
-        
-        // Sort years
-        const sortedYears = Object.keys(pubsByYear).sort((a, b) => b - a); // Descending order
-        
-        // Create HTML for publications by year
-        let pubsByYearHTML = '';
-        if (sortedYears.length > 0) {
-            pubsByYearHTML = '<div class="pubs-by-year"><h3>Publications by Year</h3><ul>';
-            sortedYears.forEach(year => {
-                pubsByYearHTML += `<li>${year}: ${pubsByYear[year]} publication${pubsByYear[year] !== 1 ? 's' : ''}</li>`;
-            });
-            pubsByYearHTML += '</ul></div>';
-        }
-        
-        // Render statistics
-        this.statsElement.innerHTML = `
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <div class="stat-number">${totalPubs}</div>
-                    <div class="stat-label">Publications</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${citations}</div>
-                    <div class="stat-label">Total Citations</div>
-                </div>
-                <div class="stat-box">
-                    <div class="stat-number">${hIndex}</div>
-                    <div class="stat-label">h-index</div>
-                </div>
-            </div>
-            ${pubsByYearHTML}
-        `;
-    }
-    
-    /**
-     * Update the last updated timestamp
-     */
-    updateLastUpdatedTime() {
-        if (!this.lastUpdatedElement) return;
-        
-        const now = new Date();
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const day = String(now.getDate()).padStart(2, '0');
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-        
-        const timestamp = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-        
-        this.lastUpdatedElement.textContent = timestamp;
-    }
-    
-    /**
-     * Show loading indicator
-     */
-    showLoading() {
-        if (this.loadingElement) {
-            this.loadingElement.style.display = 'block';
-        }
-    }
-    
-    /**
-     * Hide loading indicator
-     */
-    hideLoading() {
-        if (this.loadingElement) {
-            this.loadingElement.style.display = 'none';
-        }
-    }
-    
-    /**
-     * Show error message
-     */
-    showError(message) {
-        if (this.errorElement) {
-            this.errorElement.textContent = message;
-            this.errorElement.style.display = 'block';
-        }
-    }
-    
-    /**
-     * Hide error message
-     */
-    hideError() {
-        if (this.errorElement) {
-            this.errorElement.style.display = 'none';
-        }
-    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error fetching publications:', error);
+    document.getElementById('publications-container').innerHTML = 
+      `<p class="error">Failed to load publications data. Please try again later.</p>`;
+    return null;
+  }
 }
 
-// Initialize when the DOM is fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-    // Author ID from INSPIRE-HEP
-    const authorId = 'E.Chaussidon.1';
-    
-    // Create and initialize the component
-    const publications = new InspirePublications(authorId, {
-        publicationsElementId: 'publications-list',
-        statsElementId: 'publication-stats',
-        loadingElementId: 'publications-loading',
-        errorElementId: 'publications-error',
-        lastUpdatedElementId: 'last-updated',
-        refreshButtonId: 'refresh-publications'
-    });
-    
-    publications.init();
+// Calculate h-index from citation data
+function calculateHIndex(papers) {
+  if (!papers || papers.length === 0) return 0;
+  
+  // Extract citation counts and sort in descending order
+  const citationCounts = papers
+    .map(paper => paper.metadata.citation_count || 0)
+    .sort((a, b) => b - a);
+  
+  let h = 0;
+  for (let i = 0; i < citationCounts.length; i++) {
+    if (citationCounts[i] >= i + 1) {
+      h = i + 1;
+    } else {
+      break;
+    }
+  }
+  
+  return h;
+}
+
+// Format publication date
+function formatDate(dateString) {
+  if (!dateString) return 'N/A';
+  
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = date.toLocaleString('default', { month: 'short' });
+  
+  return `${month} ${year}`;
+}
+
+// Extract authors with formatting
+function formatAuthors(authors) {
+  if (!authors || authors.length === 0) return 'N/A';
+  
+  // Limit to first 5 authors if there are many
+  const authorList = authors.slice(0, 5);
+  const authorNames = authorList.map(author => {
+    const name = author.full_name || '';
+    // Highlight your name
+    if (name.includes('Chaussidon')) {
+      return `<strong>${name}</strong>`;
+    }
+    return name;
+  });
+  
+  let authorString = authorNames.join(', ');
+  if (authors.length > 5) {
+    authorString += ` et al.`;
+  }
+  
+  return authorString;
+}
+
+// Render publication item
+function createPublicationItem(publication) {
+  const pub = publication.metadata;
+  const title = pub.titles ? pub.titles[0].title : 'No title';
+  const authors = formatAuthors(pub.authors);
+  const journal = pub.publication_info && pub.publication_info[0] ? 
+    pub.publication_info[0].journal_title : 'Preprint';
+  const date = pub.date ? formatDate(pub.date) : 'N/A';
+  const citations = pub.citation_count || 0;
+  const doi = pub.dois && pub.dois.length > 0 ? pub.dois[0].value : null;
+  const arxiv = pub.arxiv_eprints && pub.arxiv_eprints.length > 0 ? 
+    pub.arxiv_eprints[0].value : null;
+  
+  // Update total citations
+  totalCitations += citations;
+  
+  // Build HTML
+  let pubHTML = `
+    <div class="publication-item">
+      <h3>${title}</h3>
+      <p class="authors">${authors}</p>
+      <p class="journal"><em>${journal}</em>, ${date}</p>
+      <p class="citations">Citations: ${citations}</p>
+      <div class="publication-links">
+  `;
+  
+  if (doi) {
+    pubHTML += `<a href="https://doi.org/${doi}" target="_blank" rel="noopener">DOI</a>`;
+  }
+  
+  if (arxiv) {
+    pubHTML += `<a href="https://arxiv.org/abs/${arxiv}" target="_blank" rel="noopener">arXiv</a>`;
+  }
+  
+  pubHTML += `
+        <a href="https://inspirehep.net/literature/${publication.id}" target="_blank" rel="noopener">INSPIRE</a>
+      </div>
+    </div>
+  `;
+  
+  return pubHTML;
+}
+
+// Render publications list and stats
+function renderPublications(data) {
+  const publicationsContainer = document.getElementById('publications-container');
+  const statsContainer = document.getElementById('publication-stats');
+  
+  if (!data || !data.hits || !data.hits.hits) {
+    publicationsContainer.innerHTML = '<p>No publications found.</p>';
+    return;
+  }
+  
+  const papers = data.hits.hits;
+  totalPublications = papers.length;
+  
+  // Calculate h-index
+  hIndex = calculateHIndex(papers);
+  
+  // Render stats
+  if (statsContainer) {
+    statsContainer.innerHTML = `
+      <div class="stat-item">
+        <span class="stat-number">${totalPublications}</span>
+        <span class="stat-label">Publications</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">${totalCitations}</span>
+        <span class="stat-label">Citations</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">${hIndex}</span>
+        <span class="stat-label">h-index</span>
+      </div>
+    `;
+  }
+  
+  // Render publications
+  let publicationsHTML = '<div class="publications-list">';
+  
+  papers.forEach(paper => {
+    publicationsHTML += createPublicationItem(paper);
+  });
+  
+  publicationsHTML += '</div>';
+  publicationsContainer.innerHTML = publicationsHTML;
+}
+
+// Initialize
+document.addEventListener('DOMContentLoaded', async () => {
+  const data = await fetchPublicationsData();
+  if (data) {
+    renderPublications(data);
+  }
 });
