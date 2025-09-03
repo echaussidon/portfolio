@@ -21,6 +21,17 @@
             margin-bottom: 20px;
         }
         
+        .api-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .api-info a {
+            color: var(--secondary-color);
+            text-decoration: underline;
+        }
+        
         .last-updated-info {
             display: flex;
             flex-direction: column;
@@ -247,8 +258,11 @@
             <div class="publications-header">
                 <h2>Publications</h2>
                 <p>My publication record from INSPIRE-HEP</p>
+                <div class="api-info">
+                    Data provided by the <a href="https://inspirehep.net/api/doc" target="_blank">INSPIRE-HEP REST API</a>
+                </div>
                 <div class="last-updated-info">
-                    <div>Data as of: <span id="last-updated">Loading...</span></div>
+                    <div>Last updated: <span id="last-updated">Loading...</span></div>
                 </div>
             </div>
             
