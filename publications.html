@@ -27,12 +27,29 @@
     <section class="selected-publications">
         <div class="container">
             <h2>Publications</h2>
-            <div class="inspire-info-bar">
-                <span id="inspire-update-info"></span>
-                <button id="inspire-btn" class="btn inspire-btn" onclick="window.open('https://inspirehep.net/authors/1908124?ui-citation-summary=true','_blank')">Inspire HEP</button>
+
+            <div class="inspire-info-bar" style="display: flex; align-items: center; justify-content: center; gap: -0.3cm;">
+                <span id="inspire-update-info" style="align-self: center;"></span>
+                <button id="inspire-btn" class="btn inspire-btn" style="align-self: center; margin-top: 0;" onclick="window.open('https://inspirehep.net/authors/1908124?ui-citation-summary=true','_blank')">Inspire HEP</button>
             </div>
 
+            <!-- Sorting option moved below stats -->
+
             <div id="publication-stats" class="publication-stats"></div>
+
+
+
+                        <div class="publication-sort-bar">
+                                <label for="publication-sort-select">Sort by:</label>
+                                <select id="publication-sort-select">
+                                        <option value="date">Date (most recent first)</option>
+                                        <option value="citations">Number of citations</option>
+                                </select>
+                                <label for="author-rank-checkbox" style="margin-left:1em; font-weight:400; font-size:0.98em;">
+                                    <input type="checkbox" id="author-rank-checkbox" style="vertical-align:middle; margin-right:0.3em;"> Main contributor
+                                </label>
+                        </div>
+            <div style="height: 1.5em;"></div>
 
             <ul id="publications-container" class="publication-list"></ul>
         </div>

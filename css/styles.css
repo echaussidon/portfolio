@@ -52,9 +52,50 @@
     letter-spacing: 0.5px;
 }
 /* Inspire info bar (publications) */
+/* Inspire info bar (publications) */
 .inspire-info-bar {
     background: #e8eaf6;
-    padding: 6px 0 4px 0;
+    padding: 4px 12px 4px 12px;
+    min-height: 28px;
+    max-width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+    box-shadow: 0 1px 4px rgba(120,130,180,0.08);
+    text-align: center;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    gap: 0.3cm;
+}
+/* Publication sort bar - improved style */
+.publication-sort-bar {
+    background: #f3f3f7;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(120,130,180,0.07);
+    padding: 12px 20px 12px 20px;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+.publication-sort-bar label {
+    font-weight: 500;
+    color: #222;
+    margin-right: 6px;
+}
+
+.publication-sort-bar select {
+    background: #fff;
+    border: 1.5px solid #bdbdbd;
+    border-radius: 5px;
+    padding: 5px 12px;
+    font-size: 1em;
+    color: #222;
+    transition: border 0.2s;
+    outline: none;
+}
+.publication-sort-bar select:focus {
+    border-color: var(--primary-color);
+}
     margin-bottom: 18px;
     border-radius: 6px;
     display: flex;
@@ -138,26 +179,6 @@ body {
     color: var(--text-color);
     margin: 0;
     padding: 0;
-    .inspire-info-bar .inspire-btn {
-        /* Hérite du style .btn */
-        display: inline-flex;
-        align-items: center;
-        background-color: var(--primary-color);
-        color: var(--light-text);
-        padding: 10px 20px;
-        border-radius: var(--border-radius);
-        text-decoration: none;
-        transition: var(--transition);
-        font-size: 1rem;
-        box-shadow: none;
-        margin-left: 0;
-        height: auto;
-    }
-    .inspire-info-bar .inspire-btn:hover {
-        background-color: var(--secondary-color);
-        color: var(--light-text);
-        transform: translateY(-2px);
-    background-color: var(--background-color);
 }
 
 .container {
@@ -211,7 +232,7 @@ img {
 header {
     background-color: var(--primary-color);
     color: var(--light-text);
-    padding: 20px 0;
+    padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;

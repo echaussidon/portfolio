@@ -47,7 +47,7 @@ async function fetchPublicationsData() {
 }
 
 // Render publications list and stats (état stable)
-function renderPublications(data) {
+function renderPublications(data, sortBy = 'date') {
   const publicationsContainer = document.getElementById('publications-container');
   const statsContainer = document.getElementById('publication-stats');
   if (!data || !data.hits || !data.hits.hits) {
@@ -55,10 +55,34 @@ function renderPublications(data) {
     return;
   }
   // Filtrer la publication à exclure
-  const filteredPapers = data.hits.hits.filter(paper => {
+  let filteredPapers = data.hits.hits.filter(paper => {
     const title = paper.metadata && paper.metadata.titles && paper.metadata.titles[0] ? paper.metadata.titles[0].title : '';
     return title.trim() !== 'Studying inflation with quasars from the DESI spectroscopic survey';
   });
+
+  // Filtre supplémentaire : seulement les articles où l'utilisateur est dans les 8 premiers auteurs
+  const authorRankCheckbox = document.getElementById('author-rank-checkbox');
+  if (authorRankCheckbox && authorRankCheckbox.checked) {
+    filteredPapers = filteredPapers.filter(paper => {
+      const authors = paper.metadata && paper.metadata.authors ? paper.metadata.authors : [];
+      // Cherche l'index de l'auteur (nom de famille insensible à la casse)
+      const idx = authors.findIndex(a => a.full_name && a.full_name.toLowerCase().includes('chaussidon'));
+      return idx > -1 && idx < 8;
+    });
+  }
+
+  // Tri dynamique
+  if (sortBy === 'citations') {
+    filteredPapers = filteredPapers.sort((a, b) => (b.metadata.citation_count || 0) - (a.metadata.citation_count || 0));
+  } else {
+    // Par date décroissante (plus récentes d'abord)
+    filteredPapers = filteredPapers.sort((a, b) => {
+      const dateA = a.metadata.date ? new Date(a.metadata.date) : new Date(0);
+      const dateB = b.metadata.date ? new Date(b.metadata.date) : new Date(0);
+      return dateB - dateA;
+    });
+  }
+
   totalPublications = filteredPapers.length;
   // Réinitialiser le compteur de citations
   totalCitations = 0;
@@ -109,16 +133,6 @@ function calculateHIndex(papers) {
   return h;
 }
 
-// Format publication date
-function formatDate(dateString) {
-  if (!dateString) return '';
-  
-  const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = date.toLocaleString('default', { month: 'short' });
-  
-  return `${month} ${year}`;
-}
 
 // Extract authors with formatting
 function formatAuthors(authors) {
@@ -150,23 +164,12 @@ function createPublicationItem(publication) {
   const authors = formatAuthors(pub.authors);
   const journal = pub.publication_info && pub.publication_info[0] ? 
     pub.publication_info[0].journal_title : '';
-  const date = pub.date ? formatDate(pub.date) : '';
   const citations = pub.citation_count || 0;
   const doi = pub.dois && pub.dois.length > 0 ? pub.dois[0].value : null;
   const arxiv = pub.arxiv_eprints && pub.arxiv_eprints.length > 0 ? 
     pub.arxiv_eprints[0].value : null;
-  
-  // Ne pas incrémenter ici, le total est géré dans renderPublications
-  
-  // Build HTML
-  // Format mois et année (ex: Sep 2025)
-  let monthYear = '';
-  if (pub.date) {
-    const d = new Date(pub.date);
-    const month = d.toLocaleString('en-US', { month: 'short' });
-    const year = d.getFullYear();
-    monthYear = `${month} ${year}`;
-  }
+  const date = pub.preprint_date ? new Date(pub.preprint_date) : new Date(0);
+
   let arxivBtn = '';
   if (arxiv) {
     arxivBtn = `<a href="https://arxiv.org/abs/${arxiv}" target="_blank" rel="noopener" class="arxiv-btn">arXiv:${arxiv}</a>`;
@@ -182,17 +185,13 @@ function createPublicationItem(publication) {
       <h3><a href="https://inspirehep.net/literature/${publication.id}" target="_blank" rel="noopener">${title}</a></h3>
       <p class="authors">${authors}</p>
       <p class="journal">
-        ${journalHTML}
-        ${monthYear ? `, <span class='pub-date'>${monthYear}</span>` : ''}
+  ${journalHTML}
+  ${date && !isNaN(date) ? `,  <span class='pub-date'>${date.toLocaleString('en-US', { month: 'short' })} ${date.getFullYear()}</span>` : ``}
         ${arxivBtn ? ` | ${arxivBtn}` : ''}
         ${citations ? `<span class=\"citations-inline\"> | Citations: <strong>${citations}</strong></span>` : ''}
       </p>
       <div class="publication-links">
   `;
-  
-  // DOI link déjà intégré au nom du journal si présent
-  
-  // arxivBtn déjà affiché sur la ligne du journal
   
   pubHTML += `
       </div>
@@ -201,9 +200,6 @@ function createPublicationItem(publication) {
   
   return pubHTML;
 }
-
-// --- Suppression du tri dynamique, retour à la version simple ---
-// (renderPublications simple déjà défini plus haut)
 
 // Affiche la date de mise à jour dans la barre info (en anglais)
 function updateInspireInfoBar(cacheObj) {
@@ -221,20 +217,53 @@ function updateInspireInfoBar(cacheObj) {
 
 // Initialisation DOM
 document.addEventListener('DOMContentLoaded', async () => {
+  let currentSort = 'date';
+  const sortSelect = document.getElementById('publication-sort-select');
+  const authorRankCheckbox = document.getElementById('author-rank-checkbox');
+
+  // Fonction pour afficher selon le tri courant et le filtre auteur
+  function displayPublicationsWithSort(data) {
+    renderPublications(data, currentSort);
+  }
+
   // 1. Affiche d'abord le cache s'il existe
   const cachedObj = getPublicationsFromCache();
   if (cachedObj && cachedObj.data) {
-    renderPublications(cachedObj.data);
+    displayPublicationsWithSort(cachedObj.data);
     updateInspireInfoBar(cachedObj);
   } else {
     updateInspireInfoBar(null);
   }
+
   // 2. Puis fetch et met à jour si besoin
   const data = await fetchPublicationsData();
   if (data) {
-    renderPublications(data);
+    displayPublicationsWithSort(data);
     // Met à jour la barre info avec la nouvelle date
     const newCache = getPublicationsFromCache();
     updateInspireInfoBar(newCache);
+  }
+
+  // 3. Gestion du select de tri et du filtre auteur
+  if (sortSelect) {
+    sortSelect.addEventListener('change', async (e) => {
+      currentSort = sortSelect.value;
+      const cacheObj = getPublicationsFromCache();
+      if (cacheObj && cacheObj.data) {
+        displayPublicationsWithSort(cacheObj.data);
+      } else if (data) {
+        displayPublicationsWithSort(data);
+      }
+    });
+  }
+  if (authorRankCheckbox) {
+    authorRankCheckbox.addEventListener('change', async (e) => {
+      const cacheObj = getPublicationsFromCache();
+      if (cacheObj && cacheObj.data) {
+        displayPublicationsWithSort(cacheObj.data);
+      } else if (data) {
+        displayPublicationsWithSort(data);
+      }
+    });
   }
 });
