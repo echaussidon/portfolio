@@ -32,6 +32,26 @@ function getPublicationsFromCache() {
 
 // Fetch publications data
 async function fetchPublicationsData() {
+  // Nouvelle logique : ne fetch que si le cache date de plus d'un jour
+  let cached = getPublicationsFromCache();
+  const now = Date.now();
+  const oneDay = 24 * 60 * 60 * 1000;
+  let shouldFetch = true;
+  if (cached && cached.timestamp && cached.data && (now - cached.timestamp < oneDay)) {
+    // Moins d'un jour : on affiche le cache, mais on va quand même fetch en arrière-plan
+    shouldFetch = false;
+    setTimeout(async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          savePublicationsToCache(data);
+        }
+      } catch (e) {}
+    }, 0);
+    return cached.data;
+  }
+  // Sinon, fetch et met à jour le cache
   try {
     const response = await fetch(API_URL);
     if (!response.ok) {
@@ -39,9 +59,12 @@ async function fetchPublicationsData() {
     }
     const data = await response.json();
     savePublicationsToCache(data);
+    cached = getPublicationsFromCache();
     return data;
   } catch (error) {
     console.error('Error fetching publications:', error);
+    cached = getPublicationsFromCache();
+    if (cached && cached.data) return cached.data;
     return null;
   }
 }
@@ -227,7 +250,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 1. Affiche d'abord le cache s'il existe
-  const cachedObj = getPublicationsFromCache();
+  let cachedObj = getPublicationsFromCache();
   if (cachedObj && cachedObj.data) {
     displayPublicationsWithSort(cachedObj.data);
     updateInspireInfoBar(cachedObj);
@@ -237,11 +260,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // 2. Puis fetch et met à jour si besoin
   const data = await fetchPublicationsData();
+  // Toujours récupérer le cache après fetchPublicationsData (qui peut retourner le cache ou le mettre à jour)
+  cachedObj = getPublicationsFromCache();
   if (data) {
     displayPublicationsWithSort(data);
-    // Met à jour la barre info avec la nouvelle date
-    const newCache = getPublicationsFromCache();
-    updateInspireInfoBar(newCache);
+    updateInspireInfoBar(cachedObj);
+  } else {
+    // Si aucune donnée, on affiche un message d'absence de données
+    updateInspireInfoBar(null);
   }
 
   // 3. Gestion du select de tri et du filtre auteur
