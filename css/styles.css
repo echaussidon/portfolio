@@ -489,3 +489,16 @@ footer {
         margin: 5px 10px;
     }
 }
+
+/* Research page: center article titles with blue band separator */
+.research-projects .research-project h3 {
+    text-align: center;
+    color: var(--primary-color);
+    padding-bottom: 8px;
+    border-bottom: 4px solid var(--primary-color);
+    margin-bottom: 20px;
+}
+.research-projects .research-project {
+    padding-bottom: 16px;
+    margin-bottom: 28px;
+}
