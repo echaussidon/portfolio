@@ -234,7 +234,7 @@ function updateInspireInfoBar(cacheObj) {
     const timeStr = d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
     infoBar.textContent = `Last update: ${dateStr} at ${timeStr} from `;
   } else {
-    infoBar.textContent = `Loading publication list from Inspire HEP...`;
+    infoBar.textContent = `Loading publication list from`;
   }
 }
 
