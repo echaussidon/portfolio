@@ -1,3 +1,13 @@
+/* Bullets for featured research list on homepage */
+.featured-research-list {
+    list-style-type: disc;
+    margin-left: 1.5em;
+    padding-left: 0;
+    font-size: 1.08em;
+}
+.featured-research-list li {
+    margin-bottom: 8px;
+}
 /* Boutons de tri publications */
 .btn-sort.active {
     background: #1976d2;
@@ -313,7 +323,7 @@ nav ul li a:hover, nav ul li a.active {
 
 /* Featured Research Section */
 .featured-research {
-    padding: 80px 0;
+    padding: 28px 0 18px 0;
 }
 
 .featured-research h2, .selected-publications h2, .publications h2 {
@@ -417,7 +427,7 @@ nav ul li a:hover, nav ul li a.active {
 }
 
 .publication-links i {
-    margin-left: 5px;
+    margin-left: 1px;
 }
 
 .selected-publications .btn {
@@ -499,6 +509,6 @@ footer {
     margin-bottom: 20px;
 }
 .research-projects .research-project {
-    padding-bottom: 16px;
-    margin-bottom: 28px;
+    padding-bottom: 6px;
+    margin-bottom: 12px;
 }
