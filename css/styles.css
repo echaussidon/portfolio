@@ -75,6 +75,14 @@
     max-width: 90vw;
     z-index: 1;
 }
+
+/* Liens en orange dans la légende du zoom */
+.zoom-modal-caption a {
+    color: #ff9800; /* orange */
+}
+.zoom-modal-caption a:hover {
+    color: #fb8c00; /* orange un peu plus foncé au survol */
+}
 /* Project 1: image plus grande à droite */
 .project1-img {
     flex: 1 1 320px;
