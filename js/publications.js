@@ -3,7 +3,8 @@
  * Script to fetch and display publication data from INSPIRE HEP
  */
 
-const AUTHOR_QUERY = 'a E.Chaussidon.1';
+// Utilise l'ID INSPIRE de l'auteur pour une requête robuste
+const AUTHOR_QUERY = 'authors.recid:1908124';
 const API_URL = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&q=${encodeURIComponent(AUTHOR_QUERY)}`;
 
 // Stats to track
@@ -57,7 +58,20 @@ async function fetchPublicationsData() {
     if (!response.ok) {
       throw new Error(`HTTP error! Status: ${response.status}`);
     }
-    const data = await response.json();
+    let data = await response.json();
+    // Fallback si aucun résultat (sécurité en cas de changement d'indexation)
+    if (!data || !data.hits || !data.hits.hits || data.hits.hits.length === 0) {
+      const altQuery = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&q=${encodeURIComponent('a "Chaussidon, E." OR author:"Edmond Chaussidon"')}`;
+      try {
+        const altResp = await fetch(altQuery);
+        if (altResp.ok) {
+          const altData = await altResp.json();
+          if (altData && altData.hits && altData.hits.hits && altData.hits.hits.length > 0) {
+            data = altData;
+          }
+        }
+      } catch (e) { /* noop */ }
+    }
     savePublicationsToCache(data);
     cached = getPublicationsFromCache();
     return data;
@@ -74,7 +88,7 @@ function renderPublications(data, sortBy = 'date') {
   const publicationsContainer = document.getElementById('publications-container');
   const statsContainer = document.getElementById('publication-stats');
   if (!data || !data.hits || !data.hits.hits) {
-    publicationsContainer.innerHTML = '<p>No publications found.</p>';
+    publicationsContainer.innerHTML = '<p>Unable to load publications from INSPIRE at the moment. Please try again later.</p>';
     return;
   }
   // Filtrer la publication à exclure
