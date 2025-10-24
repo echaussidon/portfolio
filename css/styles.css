@@ -1,3 +1,9 @@
+/* Centrer le bouton View All Research dans Featured Research */
+.featured-research .centered-btn {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+}
 /* Layout responsive des projets: image = 1/3, texte = 2/3 sur grands écrans */
 @media (min-width: 1024px) {
     .project-flex {
