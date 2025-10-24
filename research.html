@@ -6,6 +6,17 @@
     <title>Edmond Chaussidon - Cosmology Research</title>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script>
+    window.MathJax = {
+        tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']],
+        displayMath: [['$$','$$'], ['\\[','\\]']]
+        }
+    };
+    </script>
+    <script id="MathJax-script" async
+            src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
 </head>
 <body>
     <header>
@@ -27,58 +38,98 @@
 
         <section id="project1" class="featured-research">
             <div class="container">
-                <h2>Primordial non-Gaussianity Measurement with DESI</h2>
+                <h2 style="text-align:center;">Primordial non-Gaussianity Measurement with DESI</h2>
+                <div class="project-flex">
+                        <div class="project1-text">
+                            <p>I published the state-of-the-art measurement of local PNG using galaxy survey [1] leading to the tightest constraint to date using galaxies. I dedicated the past 3 years to improve this measurement and be sure to mitigate any observational systematics. In particular, I developed a blinding strategy [2] that is applied by default in the DESI pipeline to avoid any confirmation bias when measuring the large-scale modes of the power spectrum. I was strongly involved in the clustering catalog pipeline of DESI [3,4], validating each step of the pipeline and improving the imaging systematic mitigation. Finally, I investigated alternative methodologies to constrain local PNG as the cross-correlation with the CMB lensing [5], and the use of the density perturbation moments [6]. This work is the result of an undergraduate student that I co-advised.</p>
+                            <p> <u>Highlights:</u> 
+                                <a href="https://inspirehep.net/literature/2852367" target="_blank" rel="noopener">[1] Chaussidon et al. 2025</a>, 
+                                <a href="https://inspirehep.net/literature/2793839" target="_blank" rel="noopener">[2] Chaussidon et al. 2024</a>, 
+                                <a href="https://inspirehep.net/literature/2850031" target="_blank" rel="noopener">[3] DESI Collaboration et al. 2024</a>,
+                                <a href="https://inspirehep.net/literature/2790563" target="_blank" rel="noopener">[4] Ross et al. 2024</a>,
+                                <a href="https://inspirehep.net/literature/2659379" target="_blank" rel="noopener">[5] Krolewski et al. 2023</a>,
+                                <a href="https://inspirehep.net/literature/2962285" target="_blank" rel="noopener">[6] Vislosky et al. 2025</a>
+                            </p>
+                        </div>
+                        <div class="project-img">
+                            <img src="img/research_png.png" alt="Primordial non-Gaussianity illustration" class="zoomable-img" style="max-width:420px; width:100%; border-radius:10px; box-shadow:0 2px 8px rgba(60,80,120,0.13); cursor: zoom-in;">
+                            <!-- Overlay modal for zoom (project 1) -->
+                            <div class="zoom-modal" style="display:none;">
+                                <div class="zoom-modal-bg"></div>
+                                <img src="img/research_png.png" alt="Primordial non-Gaussianity illustration" class="zoom-modal-img">
+                                <div class="zoom-modal-caption">Posteriors in the $(b_1, f_{\rm loc}^{\rm NL})$ plane of our final constraints on PNG, obtained with unblinded DR1 LRG and QSO samples. The gray band is the constraint from Planck 2018, while the gray dotted lines are the values of $b_1$ for LRG and QSO samples measured from the monopole of the 2-point correlation function. We do not consider the cross-covariance between the LRGs and QSOs. From <a href="https://inspirehep.net/literature/2852367" target="_blank" rel="noopener">Chaussidon et al. 2025</a>.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-                <p> I published the state-of-the-art measurement of local PNG using galaxy survey [1] leading to the tightest constraint to date using galaxies. I dedicated the past 3 years to improve this measurement and be sure to mitigate any observational systematics. In particular, I developed a blinding strategy [2] that is applied by default in the DESI pipeline to avoid any confirmation bias when measuring the large-scale modes of the power spectrum. I was strongly involved in the clustering catalog pipeline of DESI [3,4], validating each step of the pipeline and improving the imaging systematic mitigation. Finally, I investigated alternative methodologies to constrain local PNG as the cross-correlation with the CMB lensing [5], and the use of the density perturbation moments [6]. This work is the result of an undergraduate student that I co-advised. </p>
-                <p> <u>Highlights:</u> 
-                    <a href="https://inspirehep.net/literature/2852367" target="_blank" rel="noopener">[1] Chaussidon et al. 2025</a>, 
-                    <a href="https://inspirehep.net/literature/2793839" target="_blank" rel="noopener">[2] Chaussidon et al. 2024</a>, 
-                    <a href="https://inspirehep.net/literature/2850031" target="_blank" rel="noopener">[3] DESI Collaboration et al. 2024</a>,
-                    <a href="https://inspirehep.net/literature/2790563" target="_blank" rel="noopener">[4] Ross et al. 2024</a>,
-                    <a href="https://inspirehep.net/literature/2659379" target="_blank" rel="noopener">[5] Krolewski et al. 2023</a>,
-                    <a href="https://inspirehep.net/literature/2962285" target="_blank" rel="noopener">[6] Vislosky et al. 2025</a>
-                </p>
         </section>
 
         <section id="project2" class="featured-research">
             <div class="container">
-                <h2>kSZ velocity reconstruction of DESI galaxies</h2>
-                
+                <h2 style="text-align:center;">kSZ velocity reconstruction of DESI galaxies</h2>
+                <div class="project-flex">
+                    <div class="project2-text">
+                        <p>In prep.</p>
+                        <p> <u>Highlights:</u> 
+                            <a href="https://inspirehep.net/literature/xxx" target="_blank" rel="noopener">[1] Chaussidon et al. 2025</a>, 
+                            <a href="https://inspirehep.net/literature/xxx" target="_blank" rel="noopener">[2] Hotinli et al. 2025</a>
+                        </p>
+                    </div>
+                </div>
             </div>
-                <p>
-                    In prep.
-                </p>
-                <p> <u>Highlights:</u> 
-                    <a href="https://inspirehep.net/literature/xxx" target="_blank" rel="noopener">[1] Chaussidon et al. 2025</a>, 
-                    <a href="https://inspirehep.net/literature/xxx" target="_blank" rel="noopener">[2] Hotinli et al. 2025</a>
-
-                </p>
         </section>
 
         <section id="project3" class="featured-research">
             <div class="container">
-                <h2>Early Dark Energy in light of DESI DR2 BAO</h2>
+                <h2 style="text-align:center;">Early Dark Energy in light of DESI DR2 BAO</h2>
+                <div class="project-flex">
+                    <div class="project3-text">
+                        <p>Triggered by the new results from DESI BAO DR1 [3] (+1000 citations) and then DESI BAO DR2 [2] (+500 citations) indicating a potential detection of evolving dark energy, I worked, during my postdoc, on an alternative solution (early dark energy) [1] that modifies the physics before the recombination i.e. CBM was emitted, leading to an impactful publication (+38 citations in few months).</p>
+                        <!--Dans la selection QSO / Survey Validation: ne pas oublier d'ajouter les liens vers le site de DESI ou j'ai fait une letter et aussi le site du CEA ou j'apparait --> 
+                        <p> <u>Highlights:</u> 
+                            <a href="https://inspirehep.net/literature/2906798" target="_blank" rel="noopener">[1] Chaussidon et al. 2025</a>, 
+                            <a href="https://inspirehep.net/literature/2902314" target="_blank" rel="noopener">[2] DESI Collaboration et al. 2025</a>, 
+                            <a href="https://inspirehep.net/literature/2774167" target="_blank" rel="noopener">[3] DESI Collaboration et al. 2024</a>
+                        </p>
+                    </div>
+                    <div class="project-img">
+                        <img src="img/research_ede.png" alt="EDE illustration" class="zoomable-img" style="max-width:420px; width:100%; border-radius:10px; box-shadow:0 2px 8px rgba(60,80,120,0.13); cursor: zoom-in;">
+                        <!-- Overlay modal for zoom (project 3) -->
+                        <div class="zoom-modal" style="display:none;">
+                            <div class="zoom-modal-bg"></div>
+                            <img src="img/research_ede.png" alt="EDE illustration" class="zoom-modal-img">
+                            <div class="zoom-modal-caption">Predicted low-$z$ expansion history for the best-fit models. In each panel the purple, green and black lines are the predictions of the $\Lambda$CDM, EDE and $w_0w_a$ models that best fit the combination of CMB+BAO data, compared to the DESI "fiducial" $\Lambda$CDM model. The top panel shows the distance modulus, such as would be measured by SNe, themiddle panel the isotropic distance scale constrained by BAO and the lower panel the distance ratio. The points with error bars in the top panel are binned data from the Union3 SNe dataset, with the weighted mean set to zero to account for the unknown absolute magnitude. The points in the middle and lower panel are from DESI DR2. Note that $\Lambda$CDM and EDE predict similar late-time expansion, but the ΛCDM model provides a worse fit to the data combination than the EDE model. From <a href="https://inspirehep.net/literature/2906798" target="_blank" rel="noopener">Chaussidon et al. 2025</a>.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-                <p> Triggered by the new results from DESI BAO DR1 [3] (+1000 citations) and then DESI BAO DR2 [2] (+500 citations) indicating a potential detection of evolving dark energy, I worked, during my postdoc, on an alternative solution (early dark energy) [1] that modifies the physics before the recombination i.e. CBM was emitted, leading to an impactful publication (+38 citations in few months). </p>
-                <!--Dans la selection QSO / Survey Validation: ne pas oublier d'ajouter les liens vers le site de DESI ou j'ai fait une letter et aussi le site du CEA ou j'apparait --> 
-                <p> <u>Highlights:</u> 
-                    <a href="https://inspirehep.net/literature/2906798" target="_blank" rel="noopener">[1] Chaussidon et al. 2025</a>, 
-                    <a href="https://inspirehep.net/literature/2902314" target="_blank" rel="noopener">[2] DESI Collaboration et al. 2025</a>, 
-                    <a href="https://inspirehep.net/literature/2774167" target="_blank" rel="noopener">[3] DESI Collaboration et al. 2024</a>
-                </p>
         </section>
 
         <section id="project4" class="featured-research">
             <div class="container">
-                <h2>Quasar Target Selection for DESI</h2>
+                <h2 style="text-align:center;">Quasar Target Selection for DESI</h2>
+                <div class="project-flex">
+                    <div class="project4-text">
+                        <p>During my Ph.D., I was in charge of the Quasar Target Selection of DESI [1] (+150 citations) overpassing the DESI scientific requirement by 20%. A particularly important role since the target selection is frozen for the entire main survey of DESI. I extensively analyze the targeted sample and its dependence on the imaging quality of the photometric survey used for the selection [3]. Finally, during the survey validation phase of DESI, I validated the quasar target selection by visually inspecting several hundreds of quasar spectra and improve their redshift classification by 10% [1,2].</p>
+                        <!--Dans la section DESI BAO: mettre le liens vers le prix que DESI a recu ect... et dire que ceux sont les papiers ls plus citer ! --> 
+                        <p> <u>Highlights:</u> 
+                            <a href="https://inspirehep.net/literature/2138916" target="_blank" rel="noopener">[1] Chaussidon et al. 2022</a>, 
+                            <a href="https://inspirehep.net/literature/2138934" target="_blank" rel="noopener">[2] Alexander et al. 2022</a>, 
+                            <a href="https://inspirehep.net/literature/1901987" target="_blank" rel="noopener">[3] Chaussidon et al. 2021</a>,
+                        </p>
+                    </div>
+                    <div class="project-img">
+                        <img src="img/research_qso.png" alt="QSO illustration" class="zoomable-img" style="max-width:420px; width:100%; border-radius:10px; box-shadow:0 2px 8px rgba(60,80,120,0.13); cursor: zoom-in;">
+                        <!-- Overlay modal for zoom (project 3) -->
+                        <div class="zoom-modal" style="display:none;">
+                            <div class="zoom-modal-bg"></div>
+                            <img src="img/research_qso.png" alt="QSO illustration" class="zoom-modal-img">
+                            <div class="zoom-modal-caption"> Colors in the optical or near-infrared of objects photometrically classified as stars (red) or spectroscopically classified as QSOs (from blue to yellow dots, depending on their redshift). The color $grz-W$  allows us to reject stars based on the “infrared excess” of QSOs. From <a href="https://inspirehep.net/literature/2138916" target="_blank" rel="noopener">Chaussidon et al. 2022</a>.</div>
+                        </div>
+                    </div>
+                </div>
             </div>
-                <p> During my Ph.D., I was in charge of the Quasar Target Selection of DESI [1] (+150 citations) overpassing the DESI scientific requirement by 20%. A particularly important role since the target selection is frozen for the entire main survey of DESI. I extensively analyze the targeted sample and its dependence on the imaging quality of the photometric survey used for the selection [3]. Finally, during the survey validation phase of DESI, I validated the quasar target selection by visually inspecting several hundreds of quasar spectra and improve their redshift classification by 10% [1,2]. </p>
-                <!--Dans la section DESI BAO: mettre le liens vers le prix que DESI a recu ect... et dire que ceux sont les papiers ls plus citer ! --> 
-                <p> <u>Highlights:</u> 
-                    <a href="https://inspirehep.net/literature/2138916" target="_blank" rel="noopener">[1] Chaussidon et al. 2022</a>, 
-                    <a href="https://inspirehep.net/literature/2138934" target="_blank" rel="noopener">[2] Alexander et al. 2022</a>, 
-                    <a href="https://inspirehep.net/literature/1901987" target="_blank" rel="noopener">[3] Chaussidon et al. 2021</a>
-                </p>
         </section>
         </div>
 
@@ -98,5 +149,6 @@
     </footer>
 
     <script src="js/main.js"></script>
+<script src="js/image-zoom.js"></script>
 </body>
 </html>

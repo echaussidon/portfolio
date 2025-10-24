@@ -1,3 +1,116 @@
+/* Layout responsive des projets: image = 1/3, texte = 2/3 sur grands écrans */
+@media (min-width: 1024px) {
+    .project-flex {
+        display: flex;
+        align-items: flex-start;
+        gap: 24px;
+    }
+    .project-flex .project-img {
+            flex: 0 0 40%;
+            max-width: 40%;
+    }
+    .project-flex .project-img img {
+        width: 100%;
+        max-width: 100% !important; /* override des styles inline (ex: 420px) */
+        height: auto;
+    }
+    .project-flex > :not(.project-img) {
+            flex: 0 0 60%;
+            max-width: 60%;
+    }
+}
+/* Overlay zoom image pour projet 1 */
+.zoom-modal {
+    position: fixed;
+    z-index: 9999;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: rgba(20, 24, 40, 0.82);
+    transition: opacity 0.2s;
+    padding: 16px;
+    overflow: auto; /* évite les débordements sur petits écrans */
+}
+.zoom-modal-bg {
+    position: absolute;
+    left: 0; top: 0; width: 100%; height: 100%;
+    background: transparent;
+    cursor: zoom-out;
+}
+.zoom-modal-img {
+    position: relative;
+    display: block;
+    width: auto;    /* conserve le ratio */
+    height: auto;   /* conserve le ratio */
+    max-width: 90vw;
+    max-height: calc(85vh - 56px); /* laisse de la place pour la légende */
+    object-fit: contain; /* évite toute déformation si contraint */
+    border-radius: 12px;
+    box-shadow: 0 4px 32px rgba(30,40,80,0.25);
+    background: #fff;
+    cursor: zoom-out;
+    z-index: 1;
+    transition: box-shadow 0.2s;
+}
+
+.zoom-modal-caption {
+    position: relative;
+    margin-top: 12px;
+    padding: 0 12px;
+    color: #e9ecf4;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: center;
+    max-width: 90vw;
+    z-index: 1;
+}
+/* Project 1: image plus grande à droite */
+.project1-img {
+    flex: 1 1 320px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-width: 180px;
+    margin-left: 18px;
+}
+@media (max-width: 900px) {
+    .project1-img {
+        justify-content: center;
+        margin: 18px 0 0 0;
+    }
+}
+/* Project 3: texte à gauche, image à droite */
+.project-flex {
+    display: flex;
+    align-items: flex-start;
+    gap: 32px;
+}
+.project3-text {
+    flex: 2 1 0;
+    min-width: 0;
+}
+.project3-img {
+    flex: 1 1 220px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-end;
+    min-width: 120px;
+}
+@media (max-width: 900px) {
+    .project-flex {
+        flex-direction: column;
+        gap: 18px;
+    }
+    .project3-img {
+        justify-content: center;
+        margin-bottom: 12px;
+    }
+}
 /* Bullets for featured research list on homepage */
 .featured-research-list {
     list-style-type: disc;
