@@ -300,6 +300,94 @@
     --transition: all 0.3s ease;
 }
 
+/* Contact section */
+.contact-section {
+    padding: 0 0 40px; /* sections classiques */
+    background: transparent; /* comme Featured Research */
+}
+.contact-card {
+    display: flex;
+    align-items: flex-start; /* aligner en haut, comme les sections research */
+    gap: 28px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+.contact-photo {
+    flex: 0 0 220px;
+    display: flex;
+    justify-content: flex-start; /* photo bien à gauche */
+}
+.photo-placeholder {
+    width: 220px;
+    aspect-ratio: 1 / 1;
+    border: 1.5px solid #bdbdbd; /* plus sobre, cohérent */
+    border-radius: 10px;
+    background: #fff; /* neutre comme les autres sections */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #606a8a;
+    gap: 8px;
+}
+.photo-placeholder i {
+    font-size: 2rem;
+    opacity: 0.8;
+}
+.photo-placeholder span {
+    font-size: 0.95rem;
+}
+
+/* Photo réelle dans Contact */
+.contact-photo-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1.5px solid #bdbdbd;
+}
+.contact-details {
+    flex: 1 1 auto;
+}
+.contact-details p {
+    margin-bottom: 10px;
+}
+.contact-links {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+/* Bullet list de liens Contact */
+.contact-links-list {
+    list-style-type: disc;
+    margin-left: 1.5em;
+    padding-left: 0;
+    font-size: 1.05em;
+    margin-top: 8px;
+}
+.contact-links-list li {
+    margin-bottom: 6px;
+}
+.contact-links-list a {
+    color: var(--secondary-color);
+}
+.contact-links-list a:hover {
+    color: var(--primary-color);
+}
+.contact-links-list i {
+    margin-right: 6px;
+    font-size: 1.1em;
+}
+
+@media (max-width: 700px) {
+    .contact-card {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .contact-photo { flex: 0 0 auto; }
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -453,7 +541,7 @@ nav ul li a:hover, nav ul li a.active {
     padding: 28px 0 18px 0;
 }
 
-.featured-research h2, .selected-publications h2, .publications h2 {
+.featured-research h2, .selected-publications h2, .publications h2, .contact-section h2 {
     text-align: center;
     margin-top: 1cm;
     margin-bottom: 40px;
@@ -461,7 +549,7 @@ nav ul li a:hover, nav ul li a.active {
     position: relative;
 }
 
-.featured-research h2:after, .selected-publications h2:after {
+.featured-research h2:after, .selected-publications h2:after, .contact-section h2:after {
     content: '';
     display: block;
     width: 80px;
