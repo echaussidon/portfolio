@@ -12,6 +12,20 @@ let totalPublications = 0;
 let totalCitations = 0;
 let hIndex = 0;
 
+function getPublicationDate(metadata) {
+  if (!metadata) return new Date(0);
+  const rawDate = metadata.preprint_date || metadata.date;
+  if (!rawDate) return new Date(0);
+  const parsedDate = new Date(rawDate);
+  return isNaN(parsedDate) ? new Date(0) : parsedDate;
+}
+
+function getPublicationYear(publication) {
+  const date = getPublicationDate(publication && publication.metadata ? publication.metadata : null);
+  const year = date.getFullYear();
+  return year > 0 ? year : 'Unknown year';
+}
+
 // --- Cache helpers ---
 // (imported from publications-cache.js if using modules, else copy here)
 const PUBLICATIONS_CACHE_KEY = 'publications_cache_v1';
@@ -114,8 +128,8 @@ function renderPublications(data, sortBy = 'date') {
   } else {
     // Par date décroissante (plus récentes d'abord)
     filteredPapers = filteredPapers.sort((a, b) => {
-      const dateA = a.metadata.date ? new Date(a.metadata.date) : new Date(0);
-      const dateB = b.metadata.date ? new Date(b.metadata.date) : new Date(0);
+      const dateA = getPublicationDate(a.metadata);
+      const dateB = getPublicationDate(b.metadata);
       return dateB - dateA;
     });
   }
@@ -125,8 +139,18 @@ function renderPublications(data, sortBy = 'date') {
   totalCitations = 0;
   // Render publications et compter les citations
   let publicationsHTML = '';
+  let lastRenderedYear = null;
   filteredPapers.forEach(paper => {
     totalCitations += paper.metadata.citation_count || 0;
+
+    if (sortBy === 'date') {
+      const currentYear = getPublicationYear(paper);
+      if (currentYear !== lastRenderedYear) {
+        publicationsHTML += `<li class="year-separator"><div class="year-separator-label">${currentYear}</div></li>`;
+        lastRenderedYear = currentYear;
+      }
+    }
+
     publicationsHTML += `<li>${createPublicationItem(paper)}</li>`;
   });
   publicationsContainer.innerHTML = publicationsHTML;
@@ -205,7 +229,7 @@ function createPublicationItem(publication) {
   const doi = pub.dois && pub.dois.length > 0 ? pub.dois[0].value : null;
   const arxiv = pub.arxiv_eprints && pub.arxiv_eprints.length > 0 ? 
     pub.arxiv_eprints[0].value : null;
-  const date = pub.preprint_date ? new Date(pub.preprint_date) : new Date(0);
+  const date = getPublicationDate(pub);
 
   let arxivBtn = '';
   if (arxiv) {
