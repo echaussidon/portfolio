@@ -188,24 +188,72 @@
     color: #555;
     letter-spacing: 0.5px;
 }
-/* Inspire info bar (publications) */
-/* Inspire info bar (publications) */
-.inspire-info-bar {
-    background: #e8eaf6;
-    padding: 4px 0 4px 12px;
-    min-height: 28px;
-    max-width: fit-content;
-    flex-wrap: nowrap;
-    margin-left: auto;
-    margin-right: auto;
-    box-shadow: 0 1px 4px rgba(120,130,180,0.08);
+/* Inspire source note (publications) */
+.inspire-source-note {
     text-align: center;
-    border-radius: 8px;
+    color: #555;
+    font-size: 0.98rem;
+    margin: 0.5em auto 1.2em;
+}
+.inspire-source-note a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+}
+.inspire-source-note a:hover {
+    text-decoration: underline;
+}
+
+/* Publications per year chart */
+.year-chart-container {
+    background: #f3f3f7;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(120,130,180,0.07);
+    padding: 16px 20px 12px;
+    margin: 0 auto 18px;
+    max-width: 800px;
+}
+.year-chart-title {
+    text-align: center;
+    font-size: 1.05rem;
+    color: var(--primary-color);
+    margin: 0 0 12px;
+}
+.year-chart {
     display: flex;
     align-items: center;
-    gap: 0;
-    padding-right: 0 !important;
+    justify-content: center;
+    min-height: 160px;
+    overflow-x: auto;
 }
+.year-chart-empty {
+    text-align: center;
+    color: #777;
+    margin: 0;
+}
+.year-chart-svg {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+}
+.year-chart-grid {
+    stroke: #ddd;
+    stroke-width: 1;
+}
+.year-chart-axis-label {
+    font-size: 11px;
+    fill: #555;
+}
+.year-chart-line {
+    stroke: var(--secondary-color);
+    stroke-width: 2.5;
+}
+.year-chart-dot {
+    fill: var(--primary-color);
+    stroke: #fff;
+    stroke-width: 1.5;
+}
+
 /* Publication sort bar - improved style */
 .publication-sort-bar {
     background: #f3f3f7;
@@ -244,47 +292,6 @@
 
 .publication-sort-bar select:focus {
     border-color: var(--primary-color);
-}
-.inspire-info-bar #inspire-update-info {
-    font-size: 0.98rem;
-    color: #222;
-    font-weight: 500;
-    background: #f6f7fb;
-    border-radius: 6px;
-    padding: 4px 12px;
-    margin-right: 0.3cm;
-    display: inline-block;
-    box-sizing: border-box;
-}
-.inspire-info-bar .inspire-btn {
-    margin-left: 0;
-    padding: 0;
-    font-size: 0.97rem;
-    border-radius: 4px;
-    background: #3f51b5;
-    color: #fff;
-    box-shadow: 0 1px 2px rgba(60,60,120,0.07);
-    display: flex;
-    align-items: center;
-    height: 32px;
-}
-.inspire-info-bar #inspire-update-info {
-    font-size: 0.98rem;
-    color: #222;
-    font-weight: 500;
-}
-.inspire-info-bar .inspire-btn {
-    margin-left: 0;
-    padding: 7px 18px;
-    font-size: 0.97rem;
-    border-radius: 4px;
-    background: #3f51b5;
-    color: #fff;
-    box-shadow: 0 1px 2px rgba(60,60,120,0.07);
-}
-.inspire-info-bar .inspire-btn:hover {
-    background: #283593;
-    color: #fff;
 }
 /* Base Styles */
 :root {

@@ -40,7 +40,8 @@
 	}
 
 	async function fetchCitationsByArxiv(arxivId) {
-		const url = `https://inspirehep.net/api/literature?q=${encodeURIComponent('arxiv:' + arxivId)}&size=1`;
+		// fields=citation_count réduit fortement la taille de la réponse (pas d'abstract, refs, etc.)
+		const url = `https://inspirehep.net/api/literature?q=${encodeURIComponent('arxiv:' + arxivId)}&size=1&fields=citation_count`;
 		const r = await fetch(url);
 		if (!r.ok) throw new Error('HTTP ' + r.status);
 		const data = await r.json();

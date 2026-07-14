@@ -5,7 +5,11 @@
 
 // Utilise l'ID INSPIRE de l'auteur pour une requête robuste
 const AUTHOR_QUERY = 'authors.recid:1908124';
-const API_URL = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&q=${encodeURIComponent(AUTHOR_QUERY)}`;
+// On ne demande que les champs utilisés par l'affichage : cela réduit fortement la taille de la
+// réponse (par défaut l'API renvoie aussi les résumés, références, etc.) et accélère le chargement,
+// en particulier sur les connexions mobiles/lentes.
+const PUBLICATION_FIELDS = 'titles,authors,publication_info,dois,arxiv_eprints,citation_count,preprint_date,date';
+const API_URL = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&fields=${PUBLICATION_FIELDS}&q=${encodeURIComponent(AUTHOR_QUERY)}`;
 
 // Stats to track
 let totalPublications = 0;
@@ -75,7 +79,7 @@ async function fetchPublicationsData() {
     let data = await response.json();
     // Fallback si aucun résultat (sécurité en cas de changement d'indexation)
     if (!data || !data.hits || !data.hits.hits || data.hits.hits.length === 0) {
-      const altQuery = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&q=${encodeURIComponent('a "Chaussidon, E." OR author:"Edmond Chaussidon"')}`;
+      const altQuery = `https://inspirehep.net/api/literature?sort=mostrecent&size=100&page=1&fields=${PUBLICATION_FIELDS}&q=${encodeURIComponent('a "Chaussidon, E." OR author:"Edmond Chaussidon"')}`;
       try {
         const altResp = await fetch(altQuery);
         if (altResp.ok) {
@@ -166,6 +170,8 @@ function renderPublications(data, sortBy = 'date') {
   publicationsContainer.innerHTML = publicationsHTML;
   // Calculate h-index
   hIndex = calculateHIndex(filteredPapers);
+  // Render year chart
+  renderYearChart(filteredPapers);
   // Render stats
   if (statsContainer) {
     statsContainer.innerHTML = `
@@ -203,6 +209,86 @@ function calculateHIndex(papers) {
   
   return h;
 }
+
+// Render line chart of publications per year (reflects current filters), style plt.plot
+function renderYearChart(papers) {
+  const chartContainer = document.getElementById('publications-year-chart');
+  if (!chartContainer) return;
+  if (!papers || papers.length === 0) {
+    chartContainer.innerHTML = '<p class="year-chart-empty">No publication to display.</p>';
+    return;
+  }
+
+  const counts = {};
+  papers.forEach(paper => {
+    const year = getPublicationYear(paper);
+    if (year === 'Unknown year') return;
+    counts[year] = (counts[year] || 0) + 1;
+  });
+
+  const knownYears = Object.keys(counts).map(Number);
+  if (knownYears.length === 0) {
+    chartContainer.innerHTML = '<p class="year-chart-empty">No publication to display.</p>';
+    return;
+  }
+
+  // Construit une série continue (une valeur par année, 0 si aucune publication)
+  const minYear = Math.min(...knownYears);
+  const maxYear = Math.max(...knownYears);
+  const years = [];
+  for (let y = minYear; y <= maxYear; y++) years.push(y);
+  const values = years.map(y => counts[y] || 0);
+  const maxCount = Math.max(...values, 1);
+
+  // Dimensions du graphique SVG
+  const width = 800;
+  const height = 220;
+  const marginLeft = 40;
+  const marginRight = 20;
+  const marginTop = 20;
+  const marginBottom = 36;
+  const plotWidth = width - marginLeft - marginRight;
+  const plotHeight = height - marginTop - marginBottom;
+
+  const xStep = years.length > 1 ? plotWidth / (years.length - 1) : 0;
+  const xPos = i => marginLeft + i * xStep;
+  const yPos = v => marginTop + plotHeight - (v / maxCount) * plotHeight;
+
+  const points = values.map((v, i) => `${xPos(i)},${yPos(v)}`).join(' ');
+
+  // Graduations horizontales (axe y)
+  const yTicksCount = Math.min(maxCount, 5);
+  let gridLines = '';
+  for (let t = 0; t <= yTicksCount; t++) {
+    const val = Math.round((maxCount / yTicksCount) * t);
+    const y = yPos(val);
+    gridLines += `
+      <line x1="${marginLeft}" y1="${y}" x2="${width - marginRight}" y2="${y}" class="year-chart-grid" />
+      <text x="${marginLeft - 8}" y="${y + 4}" class="year-chart-axis-label" text-anchor="end">${val}</text>`;
+  }
+
+  // Labels de l'axe x (années)
+  let xLabels = '';
+  years.forEach((y, i) => {
+    xLabels += `<text x="${xPos(i)}" y="${height - marginBottom + 18}" class="year-chart-axis-label" text-anchor="middle">${y}</text>`;
+  });
+
+  // Points avec info-bulle (title)
+  let dots = '';
+  values.forEach((v, i) => {
+    dots += `<circle cx="${xPos(i)}" cy="${yPos(v)}" r="4" class="year-chart-dot"><title>${v} publication${v !== 1 ? 's' : ''} in ${years[i]}</title></circle>`;
+  });
+
+  chartContainer.innerHTML = `
+    <svg viewBox="0 0 ${width} ${height}" class="year-chart-svg" preserveAspectRatio="xMidYMid meet">
+      ${gridLines}
+      ${xLabels}
+      <polyline points="${points}" class="year-chart-line" fill="none" />
+      ${dots}
+    </svg>`;
+}
+
+
 
 
 // Extract authors with formatting
@@ -272,20 +358,6 @@ function createPublicationItem(publication) {
   return pubHTML;
 }
 
-// Affiche la date de mise à jour dans la barre info (en anglais)
-function updateInspireInfoBar(cacheObj) {
-  const infoBar = document.getElementById('inspire-update-info');
-  if (!infoBar) return;
-  if (cacheObj && cacheObj.timestamp) {
-    const d = new Date(cacheObj.timestamp);
-    const dateStr = d.toLocaleDateString('en-GB');
-    const timeStr = d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
-    infoBar.textContent = `Last update: ${dateStr} at ${timeStr} from `;
-  } else {
-    infoBar.textContent = `Loading publication list from`;
-  }
-}
-
 // Initialisation DOM
 document.addEventListener('DOMContentLoaded', async () => {
   let currentSort = 'date';
@@ -302,9 +374,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let cachedObj = getPublicationsFromCache();
   if (cachedObj && cachedObj.data) {
     displayPublicationsWithSort(cachedObj.data);
-    updateInspireInfoBar(cachedObj);
   } else {
-    updateInspireInfoBar(null);
+    // Premier chargement (pas de cache) : on affiche un message d'attente immédiat
+    const publicationsContainer = document.getElementById('publications-container');
+    if (publicationsContainer) {
+      publicationsContainer.innerHTML = '<p>Loading publications from INSPIRE HEP…</p>';
+    }
   }
 
   // 2. Puis fetch et met à jour si besoin
@@ -313,10 +388,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   cachedObj = getPublicationsFromCache();
   if (data) {
     displayPublicationsWithSort(data);
-    updateInspireInfoBar(cachedObj);
-  } else {
-    // Si aucune donnée, on affiche un message d'absence de données
-    updateInspireInfoBar(null);
   }
 
   // 3. Gestion du select de tri et du filtre auteur
