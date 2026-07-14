@@ -113,12 +113,22 @@ function renderPublications(data, sortBy = 'date') {
 
   // Filtre supplémentaire : seulement les articles où l'utilisateur est dans les 8 premiers auteurs
   const authorRankCheckbox = document.getElementById('author-rank-checkbox');
+  const firstAuthorCheckbox = document.getElementById('first-author-checkbox');
   if (authorRankCheckbox && authorRankCheckbox.checked) {
     filteredPapers = filteredPapers.filter(paper => {
       const authors = paper.metadata && paper.metadata.authors ? paper.metadata.authors : [];
       // Cherche l'index de l'auteur (nom de famille insensible à la casse)
       const idx = authors.findIndex(a => a.full_name && a.full_name.toLowerCase().includes('chaussidon'));
       return idx > -1 && idx < 8;
+    });
+  }
+
+  // Filtre supplémentaire : seulement les articles où l'utilisateur est premier auteur
+  if (firstAuthorCheckbox && firstAuthorCheckbox.checked) {
+    filteredPapers = filteredPapers.filter(paper => {
+      const authors = paper.metadata && paper.metadata.authors ? paper.metadata.authors : [];
+      const idx = authors.findIndex(a => a.full_name && a.full_name.toLowerCase().includes('chaussidon'));
+      return idx === 0;
     });
   }
 
@@ -281,6 +291,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentSort = 'date';
   const sortSelect = document.getElementById('publication-sort-select');
   const authorRankCheckbox = document.getElementById('author-rank-checkbox');
+  const firstAuthorCheckbox = document.getElementById('first-author-checkbox');
 
   // Fonction pour afficher selon le tri courant et le filtre auteur
   function displayPublicationsWithSort(data) {
@@ -322,6 +333,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
   if (authorRankCheckbox) {
     authorRankCheckbox.addEventListener('change', async (e) => {
+      const cacheObj = getPublicationsFromCache();
+      if (cacheObj && cacheObj.data) {
+        displayPublicationsWithSort(cacheObj.data);
+      } else if (data) {
+        displayPublicationsWithSort(data);
+      }
+    });
+  }
+  if (firstAuthorCheckbox) {
+    firstAuthorCheckbox.addEventListener('change', async (e) => {
       const cacheObj = getPublicationsFromCache();
       if (cacheObj && cacheObj.data) {
         displayPublicationsWithSort(cacheObj.data);
