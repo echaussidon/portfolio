@@ -365,13 +365,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   const authorRankCheckbox = document.getElementById('author-rank-checkbox');
   const firstAuthorCheckbox = document.getElementById('first-author-checkbox');
 
+  // Données gardées en mémoire (variable JS) une fois le fetch/cache initial résolu :
+  // évite de relire/re-parser le localStorage (et donc tout délai perceptible) à chaque
+  // changement de tri ou de filtre.
+  let publicationsData = null;
+
   // Fonction pour afficher selon le tri courant et le filtre auteur
   function displayPublicationsWithSort(data) {
+    if (!data) return;
+    publicationsData = data;
     renderPublications(data, currentSort);
   }
 
-  // 1. Affiche d'abord le cache s'il existe
-  let cachedObj = getPublicationsFromCache();
+  // 1. Affiche d'abord le cache s'il existe (instantané, aucune requête réseau)
+  const cachedObj = getPublicationsFromCache();
   if (cachedObj && cachedObj.data) {
     displayPublicationsWithSort(cachedObj.data);
   } else {
@@ -382,44 +389,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  // 2. Puis fetch et met à jour si besoin
+  // 2. Puis fetch (ou récupération du cache si trop récent pour refetch) et met à jour
   const data = await fetchPublicationsData();
-  // Toujours récupérer le cache après fetchPublicationsData (qui peut retourner le cache ou le mettre à jour)
-  cachedObj = getPublicationsFromCache();
   if (data) {
     displayPublicationsWithSort(data);
   }
 
-  // 3. Gestion du select de tri et du filtre auteur
+  // 3. Gestion du select de tri et des filtres auteur : on réutilise directement les
+  // données déjà en mémoire, sans repasser par le localStorage/JSON.parse.
   if (sortSelect) {
-    sortSelect.addEventListener('change', async (e) => {
+    sortSelect.addEventListener('change', () => {
       currentSort = sortSelect.value;
-      const cacheObj = getPublicationsFromCache();
-      if (cacheObj && cacheObj.data) {
-        displayPublicationsWithSort(cacheObj.data);
-      } else if (data) {
-        displayPublicationsWithSort(data);
-      }
+      displayPublicationsWithSort(publicationsData);
     });
   }
   if (authorRankCheckbox) {
-    authorRankCheckbox.addEventListener('change', async (e) => {
-      const cacheObj = getPublicationsFromCache();
-      if (cacheObj && cacheObj.data) {
-        displayPublicationsWithSort(cacheObj.data);
-      } else if (data) {
-        displayPublicationsWithSort(data);
-      }
+    authorRankCheckbox.addEventListener('change', () => {
+      displayPublicationsWithSort(publicationsData);
     });
   }
   if (firstAuthorCheckbox) {
-    firstAuthorCheckbox.addEventListener('change', async (e) => {
-      const cacheObj = getPublicationsFromCache();
-      if (cacheObj && cacheObj.data) {
-        displayPublicationsWithSort(cacheObj.data);
-      } else if (data) {
-        displayPublicationsWithSort(data);
-      }
+    firstAuthorCheckbox.addEventListener('change', () => {
+      displayPublicationsWithSort(publicationsData);
     });
   }
 });
